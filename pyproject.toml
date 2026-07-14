@@ -85,3 +85,44 @@ skip-checking-short-docstrings = false
 # For the moment, we have a baseline of documentation format errors. Eventually, this will
 # be removed.
 baseline = ".pydoclint_baseline.txt"
+
+
+[tool.typos.default]
+locale = 'en-gb'
+extend-ignore-re = [
+  # Ignore jupyter notebook cell IDs
+  "\"id\"\\s*:\\s*\"[0-9a-f]{8,}\"",
+]
+
+[tool.typos.default.extend-words]
+# Don't correct "iy" - often used in the context of "probability of an IY operation"
+iy = "iy"
+iz = "iz"
+IZ = "IZ"
+anc = "anc"
+BA = "BA"
+youre = "you're"
+distribtuion = "distribution"
+interm = "interm"
+ket = "ket"
+ND = "ND"                         # part of NDArray
+Alise = "Alise"
+DEPOLARIZE = "DEPOLARIZE"
+depolarization = "depolarization"
+depolarizing = "depolarizing"
+Authorization = "Authorization"   # Web-related field.
+color = "color"                   # Used in matplotlib and stim APIs.
+colors = "colors"
+optimize = "optimize"             # scipy.optimize
+ax = "ax"                         # Typical naming for matplotlib Axes instances.
+center = "center"
+stabilizer = "stabilizer"
+stabilizers = "stabilizers"
+synchronize = "synchronize"       # multiprocessing import
+neighbors = "neighbors"
+capitalize = "capitalize"
+labeled = "labeled"
+labeler = "labeler"
+unrealized = "unrealized"
+writeable = "writeable"           # Used in numpy APIs.
+CPY = "CPY"                       # A ruff rule identifier
