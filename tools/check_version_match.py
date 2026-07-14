@@ -14,8 +14,18 @@ logger = logging.Logger(__name__)
 logger.addHandler(stream_handler)
 
 
-def parse_version(v):
-    """Takes a semver and returns a tuple"""
+def parse_version(v: str) -> tuple:
+    """Takes a semver and returns a version as tuple.
+
+    Args:
+      v: Semantic version.
+
+    Raise:
+      ValueError if the semver format is not supported.
+    
+    Returns:
+      A semver as a tuple
+    """
     try:
         return tuple(map(int, v.split(".")))
     except ValueError as err:
