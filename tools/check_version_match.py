@@ -15,16 +15,18 @@ logger.addHandler(stream_handler)
 
 
 def parse_version(v: str) -> tuple:
-    """Takes a semver and returns a version as tuple.
+    """
+    Parse a semantic version string.
 
     Args:
-      v: Semantic version.
-
-    Raise:
-      ValueError if the semver format is not supported.
+        v: Semantic version string in the format MAJOR.MINOR.PATCH.
 
     Returns:
-      A semver as a tuple
+        A tuple containing the major, minor, and patch version numbers.
+
+    Raises:
+        argparse.ArgumentTypeError: If v is not in the format
+            MAJOR.MINOR.PATCH or contains non-integer components.
     """
     try:
         return tuple(map(int, v.split(".")))
