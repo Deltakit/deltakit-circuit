@@ -128,13 +128,6 @@ ignore = [
     "CPY001",
 ]
 
-[lint.flake8-copyright]
-# Ruff configuration for enforcing copyright notices (https://docs.astral.sh/ruff/rules/missing-copyright-notice/)
-# We are enforcing the style presented in https://riverlane.atlassian.net/wiki/x/VgBJhg
-notice-rgx = "(?i)\\(c\\) Copyright Riverlane \\d{4}-2026. All rights reserved."
-# Avoid enforcing a header on empty (<10 bytes) files
-min-file-size = 10
-
 [format]
 # Like Black, use double quotes for strings.
 quote-style = "double"

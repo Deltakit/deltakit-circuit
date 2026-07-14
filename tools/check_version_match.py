@@ -22,7 +22,7 @@ def parse_version(v: str) -> tuple:
 
     Raise:
       ValueError if the semver format is not supported.
-    
+
     Returns:
       A semver as a tuple
     """
