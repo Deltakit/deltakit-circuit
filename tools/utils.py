@@ -14,9 +14,10 @@ def extract_version() -> str:
     Returns:
         The version string from the project's pyproject.toml
 
-    Raises:
-        FileNotFoundError: If pyproject.toml does not exist
-        KeyError: If version is not found in pyproject.toml
+    Note:
+        This function will raise:
+          - FileNotFoundError: If pyproject.toml does not exist
+          - KeyError: If version is not found in pyproject.toml
     """
     proj_home = Path(__file__).parents[1]
 
