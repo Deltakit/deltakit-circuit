@@ -28,8 +28,14 @@ def parse_version(v: str) -> tuple:
         argparse.ArgumentTypeError: If v is not in the format
             MAJOR.MINOR.PATCH or contains non-integer components.
     """
+    parts = v.split(".")
+    if len(parts) != 3:
+        msg = f"Invalid semver format: '{v}' (expected MAJOR.MINOR.PATCH)"
+        raise argparse.ArgumentTypeError(msg)
+
     try:
-        return tuple(map(int, v.split(".")))
+        major, minor, patch = map(int, parts)
+        return major, minor, patch
     except ValueError as err:
         msg = f"Invalid semver format: '{v}' (expected MAJOR.MINOR.PATCH)"
         raise argparse.ArgumentTypeError(msg) from err
