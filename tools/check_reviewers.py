@@ -129,9 +129,7 @@ def determine_required_reviewers(
 
 
 def build_reviewer_comment(
-        required: set[str],
-        approved: set[str],
-        is_draft: bool
+    required: set[str], approved: set[str], is_draft: bool
 ) -> str:
     """
     Build the pull request reviewer status comment.
@@ -148,13 +146,10 @@ def build_reviewer_comment(
     approved_list = ", ".join(sorted(approved)) or "_None_"
 
     if is_draft:
-        return (
-            "📝 **Draft PR - suggested reviewers**\n\n"
-            (
-                "At least one of the following must approve this PR "
-                "once it leaves draft:\n\n"
-                f"{required_list}"
-            )
+        return "📝 **Draft PR - suggested reviewers**\n\n"(
+            "At least one of the following must approve this PR "
+            "once it leaves draft:\n\n"
+            f"{required_list}"
         )
 
     if bool(approved & required):
@@ -187,7 +182,7 @@ def post_or_update_comment(
     # Find existing bot comment
     comments = requests.get(
         f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments",
-        headers=headers
+        headers=headers,
     ).json()
 
     existing = None
