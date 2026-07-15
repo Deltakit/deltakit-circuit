@@ -12,7 +12,7 @@ body:
         Thank you for contributing to the improvement of Deltakit. Please fill out the following sections to report a bug.
 
         > [!NOTE] A bug is a disagreement between actual and documented behaviour, or an inaccurate error message.
-        > Please file a [request from](https://github.com/Deltakit/deltakit-circuit/issues/new?template=request.md) if the
+        > Please file a [request from](https://github.com/Deltakit/deltakit-circuit/issues/new?template=request.yml) if the
         > documentation does not define the expected behaviour, if you disagree with the documented behaviour, or if you
         > are asking for a new feature or performance improvement.
         > Please use the [test failure form](https://github.com/Deltakit/deltakit-circuit/issues/new?template=test_failure.yml)
