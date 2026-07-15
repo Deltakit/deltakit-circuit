@@ -8,8 +8,7 @@ import tomlkit
 
 
 def extract_version() -> str:
-    """
-    Extract the version from the pyproject.toml file in the given project path.
+    """Extract the version from this repository's root ``pyproject.toml``.
 
     Returns:
         The version string from the project's pyproject.toml
