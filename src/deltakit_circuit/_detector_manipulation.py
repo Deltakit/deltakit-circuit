@@ -1,4 +1,4 @@
-# (c) Copyright Riverlane 2020-2025.
+# (c) Copyright Riverlane 2020-2026. All rights reserved.
 """Functionality for removing a set of detectors from a stim file
 using a Detector Error Model's detector indices as input"""
 

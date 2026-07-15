@@ -1,4 +1,4 @@
-# (c) Copyright Riverlane 2020-2025.
+# (c) Copyright Riverlane 2020-2026. All rights reserved.
 """Module which gives the abstraction of a single time step in a circuit."""
 
 from __future__ import annotations

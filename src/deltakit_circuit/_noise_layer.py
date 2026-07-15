@@ -1,4 +1,4 @@
-# (c) Copyright Riverlane 2020-2025.
+# (c) Copyright Riverlane 2020-2026. All rights reserved.
 """Module which provides a layer in a circuit which contains only noise."""
 
 from __future__ import annotations

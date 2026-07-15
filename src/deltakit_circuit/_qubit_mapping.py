@@ -1,4 +1,4 @@
-# (c) Copyright Riverlane 2020-2025.
+# (c) Copyright Riverlane 2020-2026. All rights reserved.
 """Module which defines mappings between qubits that deltakit_circuit uses and indices
 which stim uses."""
 

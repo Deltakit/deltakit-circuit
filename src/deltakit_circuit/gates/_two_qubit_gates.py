@@ -1,4 +1,4 @@
-# (c) Copyright Riverlane 2020-2025.
+# (c) Copyright Riverlane 2020-2026. All rights reserved.
 """Module which provides all two-qubit gates.
 
 In the gate class docstrings, the unitary matrices are defined so that the

@@ -1,4 +1,4 @@
-# (c) Copyright Riverlane 2020-2025.
+# (c) Copyright Riverlane 2020-2026. All rights reserved.
 """Classes which represent depolarising noise on one or two qubits."""
 
 from __future__ import annotations

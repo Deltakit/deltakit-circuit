@@ -32,6 +32,7 @@ classifiers = [
 ]
 
 dependencies = [
+  "tomlkit<0.16,>=0.14",
   "deltakit-stim>=0.2,<0.3",
   "typing-extensions~=4.0",
 ]
@@ -68,7 +69,6 @@ dev = [
 ]
 release = [
   "packaging >=25.0, <27",
-  "tomlkit<0.16,>=0.14",
   "python-semantic-release >=10.2, <11",
 ]
 
