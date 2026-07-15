@@ -39,8 +39,8 @@ exclude = [
     "_version.py",
 ]
 
-# Only include source code and tests.
-include = ["src/deltakit_circuit/**/*.py", "tests/**/*.py"]
+# Only include source code, tests, and repo tooling.
+include = ["src/deltakit_circuit/**/*.py", "tests/**/*.py", "tools/**/*.py"]
 
 # Same as Black.
 line-length = 88
