@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "deltakit-circuit"
-version = "0.9.0"
+version = "0.9.1"
 description = "Deltakit (component deltakit-circuit)"
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
@@ -32,6 +32,8 @@ classifiers = [
 ]
 
 dependencies = [
+  "packaging >=25.0, <27",
+  "requests>=2.32.0",
   "tomlkit<0.16,>=0.13",
   "deltakit-stim>=0.2,<0.3",
   "typing-extensions~=4.0",
@@ -68,7 +70,6 @@ dev = [
   "validate-pyproject >=0.24.1,<0.26",
 ]
 release = [
-  "packaging >=25.0, <27",
   "python-semantic-release >=10.6.1, <11",
 ]
 
