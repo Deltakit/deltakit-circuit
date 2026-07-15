@@ -22,7 +22,7 @@ def extract_version() -> str:
 
     pyproject_path = proj_home / "pyproject.toml"
 
-    with pyproject_path.open("rb") as f:
+    with pyproject_path.open("r", encoding="utf-8") as f:
         pyproject_data: dict = tomlkit.load(f)
 
     return pyproject_data["project"]["version"]
