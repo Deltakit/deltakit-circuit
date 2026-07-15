@@ -1,3 +1,4 @@
+# (c) Copyright Riverlane 2020-2026. All rights reserved.
 """
 Script to set the prerelease version number in the repository `pyproject.toml`.
 
@@ -8,10 +9,9 @@ Example: `python -m tools.set_pre_version -t 1734739200 -c abc1234`
 import argparse
 import logging
 from pathlib import Path
-from packaging.version import Version
-
 
 import tomlkit
+from packaging.version import Version
 
 # logging
 stream_handler = logging.StreamHandler()

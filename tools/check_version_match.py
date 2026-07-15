@@ -1,3 +1,4 @@
+# (c) Copyright Riverlane 2020-2026. All rights reserved.
 """
 Validates package version matches latest remote tag.
 """
@@ -12,6 +13,9 @@ from tools.utils import extract_version
 stream_handler = logging.StreamHandler()
 logger = logging.Logger(__name__)
 logger.addHandler(stream_handler)
+
+
+SEMVER_PARTS: int = 3
 
 
 def parse_version(v: str) -> tuple:
@@ -29,7 +33,7 @@ def parse_version(v: str) -> tuple:
             MAJOR.MINOR.PATCH or contains non-integer components.
     """
     parts = v.split(".")
-    if len(parts) != 3:
+    if len(parts) != SEMVER_PARTS:
         msg = f"Invalid semver format: '{v}' (expected MAJOR.MINOR.PATCH)"
         raise argparse.ArgumentTypeError(msg)
 
@@ -43,6 +47,7 @@ def parse_version(v: str) -> tuple:
 
 def main():
     desc = "Check that the project version matches the provided version."
+    parser = argparse.ArgumentParser(description=desc)
     parser.add_argument(
         "version",
         type=parse_version,

@@ -1,14 +1,22 @@
-"""Check whether the required approvals have been met from REQUIRED_REVIEWERS to allow the PR to
-merge. Returns exit code 0 if approvals are met, 1 on error, and 2 if approvals are not met."""
+# (c) Copyright Riverlane 2020-2026. All rights reserved.
+"""Check whether the required approvals have been met from REQUIRED_REVIEWERS
+to allow the PR to merge. Returns exit code 0 if approvals are met, 1 on error,
+and 2 if approvals are not met."""
 
 import fnmatch
 import json
+import logging
 import os
 import sys
 from pathlib import Path
 from typing import NamedTuple
 
 import requests
+
+# logging
+stream_handler = logging.StreamHandler()
+logger = logging.Logger(__name__)
+logger.addHandler(stream_handler)
 
 
 class ReqReviewerRule(NamedTuple):
@@ -120,7 +128,11 @@ def determine_required_reviewers(
     return required
 
 
-def build_reviewer_comment(required: set[str], approved: set[str], is_draft: bool) -> str:
+def build_reviewer_comment(
+        required: set[str],
+        approved: set[str],
+        is_draft: bool
+) -> str:
     """
     Build the pull request reviewer status comment.
 
@@ -138,8 +150,11 @@ def build_reviewer_comment(required: set[str], approved: set[str], is_draft: boo
     if is_draft:
         return (
             "📝 **Draft PR - suggested reviewers**\n\n"
-            "At least one of the following must approve this PR once it leaves draft:\n\n"
-            f"{required_list}"
+            (
+                "At least one of the following must approve this PR "
+                "once it leaves draft:\n\n"
+                f"{required_list}"
+            )
         )
 
     if bool(approved & required):
@@ -171,7 +186,8 @@ def post_or_update_comment(
 
     # Find existing bot comment
     comments = requests.get(
-        f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments", headers=headers
+        f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments",
+        headers=headers
     ).json()
 
     existing = None
@@ -183,7 +199,9 @@ def post_or_update_comment(
     # Create or update comment
     body_with_marker = comment_marker + "\n" + comment_body
     if existing:
-        requests.patch(existing["url"], headers=headers, json={"body": body_with_marker})
+        requests.patch(
+            existing["url"], headers=headers, json={"body": body_with_marker}
+        )
     else:
         requests.post(
             f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments",
@@ -209,12 +227,14 @@ if __name__ == "__main__":
     required_reviewers = determine_required_reviewers(rules, changed_files, pr_author)
 
     marker = "<!-- required-reviewers-check -->"
-    comment_body = build_reviewer_comment(required_reviewers, approved_reviewers, is_draft)
+    comment_body = build_reviewer_comment(
+        required_reviewers, approved_reviewers, is_draft
+    )
     post_or_update_comment(repo, pr_number, token, marker, comment_body)
 
     if bool(approved_reviewers & required_reviewers):
-        print("Valid approval found")
+        logger.info("Valid approval found")
         sys.exit(0)
     else:
-        print("Missing required approval")
+        logger.info("Missing required approval")
         sys.exit(2)
