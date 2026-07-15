@@ -1,7 +1,8 @@
 """
-Script to set prerelease version number in all `pyproject.toml`s.
-Usage: `python tools/set_pre_version.py <suffix>`
-e.g.  `python tools/set_pre_version.py -s .dev20250820160500`
+Script to set the prerelease version number in the repository `pyproject.toml`.
+
+Usage: `python -m tools.set_pre_version -t <secs_since_epoch> -c <short_commit_hash>`
+Example: `python -m tools.set_pre_version -t 1734739200 -c abc1234`
 """
 
 import argparse
