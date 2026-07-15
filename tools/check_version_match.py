@@ -58,15 +58,15 @@ def main():
     proj_version_tup = parse_version(proj_version)
 
     if proj_version_tup != tag_version_tup:
-        log_msg = (
-            f"Project version {proj_version} do not match "
-            f"latest tag version {tag_version_tup}."
+        logger.error(
+            "Project version %s does not match latest tag version %s",
+            proj_version,
+            tag_version,
         )
-        logger.error(log_msg)
         sys.exit(1)
 
     logger.info(
-        "Project version %s do not match latest tag version %s",
+        "Project version %s matches latest tag version %s",
         proj_version,
         tag_version,
     )
