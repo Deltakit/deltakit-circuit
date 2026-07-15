@@ -71,6 +71,9 @@ dev = [
 ]
 release = [
   "python-semantic-release >=10.6.1, <11",
+  "packaging >=25.0, <27",
+  "requests>=2.32.0",
+  "tomlkit<0.16,>=0.13",
 ]
 
 [tool.deptry]
