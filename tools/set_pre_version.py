@@ -46,7 +46,7 @@ if __name__ == "__main__":
     path = PROJ_HOME / "pyproject.toml"
 
     # Update file data
-    with path.open("r") as f:
+    with path.open("r", encoding="utf-8") as f:
         data: dict = tomlkit.load(f)
 
     version = Version(data["project"]["version"])
