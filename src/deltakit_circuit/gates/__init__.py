@@ -1,4 +1,4 @@
-# (c) Copyright Riverlane 2020-2025.
+# (c) Copyright Riverlane 2020-2026. All rights reserved.
 """``deltakit.circuit.gates`` contains class-based representations of Stim gates."""
 
 from deltakit_circuit.gates._abstract_gates import (

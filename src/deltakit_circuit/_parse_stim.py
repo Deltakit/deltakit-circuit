@@ -1,4 +1,4 @@
-# (c) Copyright Riverlane 2020-2025.
+# (c) Copyright Riverlane 2020-2026. All rights reserved.
 """Module which provides methods for parsing stim circuits into deltakit_circuit
 circuits."""
 
