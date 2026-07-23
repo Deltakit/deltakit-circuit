@@ -151,10 +151,12 @@ jobs:
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
     steps:
+      - name: Make dist dir
+        run: mkdir ./dist
       - name: Recover deltakit-circuit distribution files
         uses: actions/download-artifact@v8
         with:
-          pattern: ${{ env.pkg_name }}
+          pattern: publish-${{ env.pkg_name }}
           path: ./dist/
       - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
