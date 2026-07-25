@@ -105,7 +105,7 @@ jobs:
           git config --global --add safe.directory /__w/deltakit_circuit/deltakit_circuit
           COMMIT_HASH=$(git rev-parse --short HEAD)
           SECS_SINCE_EPOCH=$(date +%s)
-          uv run --no-sync python3 -m tools.set_pre_version -t "$SECS_SINCE_EPOCH" -c "$COMMIT_HASH"
+          uv run --no-sync python3 -m tools.set_pre_version -t "$SECS_SINCE_EPOCH"
       - name: Commit current state of project
         run: |
           git config user.name "riv-dev-bot"
