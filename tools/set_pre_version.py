@@ -1,6 +1,6 @@
 # (c) Copyright Riverlane 2020-2026. All rights reserved.
 """
-Script to set prerelease version number in all `pyproject.toml`s.
+Script to set the prerelease version number in the repository `pyproject.toml`.
 Usage: `python tools/set_pre_version.py <suffix>`
 e.g.  `python tools/set_pre_version.py -s .dev20250820160500`
 """
