@@ -1,9 +1,8 @@
 # (c) Copyright Riverlane 2020-2026. All rights reserved.
 """
 Script to set the prerelease version number in the repository `pyproject.toml`.
-
-Usage: `python -m tools.set_pre_version -t <secs_since_epoch> -c <short_commit_hash>`
-Example: `python -m tools.set_pre_version -t 1734739200 -c abc1234`
+Usage: `python tools/set_pre_version.py <suffix>`
+e.g.  `python tools/set_pre_version.py -s .dev20250820160500`
 """
 
 import argparse
@@ -28,31 +27,30 @@ if __name__ == "__main__":
     parser.add_argument(
         "-t",
         "--timestamp",
-        type=int,
-        required=True,
-        help="Prerelease version timestamp suffix (seconds since epoch).",
+        help="Prerelease version timestamp suffix in seconds.",
     )
     parser.add_argument(
         "-c",
         "--commit",
-        required=True,
+        default=None,
         help="Prerelease version short commit hash suffix.",
     )
     args = parser.parse_args()
     timestamp_version_suffix = args.timestamp
-    commit_version_suffix = args.commit
+
+    commit_version_suffix = ".g" + args.commit if args.commit is not None else ""
 
     # Update project version with suffix
     path = PROJ_HOME / "pyproject.toml"
 
     # Update file data
-    with path.open("r", encoding="utf-8") as f:
+    with path.open("r") as f:
         data: dict = tomlkit.load(f)
 
     version = Version(data["project"]["version"])
     prerelease_version = f"{version.major}.{version.minor}.{version.micro + 1}"
     data["project"]["version"] = (
-        prerelease_version + f".dev{timestamp_version_suffix}+g{commit_version_suffix}"
+        prerelease_version + f".dev{timestamp_version_suffix}{commit_version_suffix}"
     )
 
     # Write updated data to file
