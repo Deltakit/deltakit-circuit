@@ -33,7 +33,7 @@ if __name__ == "__main__":
         "-c",
         "--commit",
         default=None,
-        help=("Prerelease version short commit hash suffix."),
+        help="Prerelease version short commit hash suffix.",
     )
     args = parser.parse_args()
     timestamp_version_suffix = args.timestamp
