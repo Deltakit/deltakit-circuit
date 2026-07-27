@@ -27,7 +27,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-t",
         "--timestamp",
-        help=("Prerelease version timestamp suffix in seconds."),
+        help="Prerelease version timestamp suffix in seconds.",
     )
     parser.add_argument(
         "-c",
