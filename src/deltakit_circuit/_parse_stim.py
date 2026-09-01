@@ -110,7 +110,7 @@ def _parse_two_qubit_gate_instruction(
     instruction_targets: Sequence[stim.GateTarget],
     tag: str | None,
     qubit_mapping: Mapping[int, Qubit],
-) -> GateLayer:
+) -> list[GateLayer]:
     targets: list[Qubit | SweepBit | MeasurementRecord] = []
     for target in instruction_targets:
         if target.is_sweep_bit_target:
@@ -119,7 +119,28 @@ def _parse_two_qubit_gate_instruction(
             targets.append(MeasurementRecord(target.value))
         else:
             targets.append(qubit_mapping.get(target.value, Qubit(target.value)))
-    return GateLayer(gate_class.from_consecutive(targets, tag=tag))
+
+    layers: list[GateLayer] = []
+    last_layer_for_qubit: dict[Qubit, int] = {}
+
+    for gate in gate_class.from_consecutive(targets, tag=tag):
+        layer_index = (
+            max(
+                (last_layer_for_qubit.get(qubit, -1) for qubit in gate.qubits),
+                default=-1,
+            )
+            + 1
+        )
+
+        if layer_index == len(layers):
+            layers.append(GateLayer(gate))
+        else:
+            layers[layer_index].add_gates(gate)
+
+        for qubit in gate.qubits:
+            last_layer_for_qubit[qubit] = layer_index
+
+    return layers
 
 
 def _parse_single_qubit_measurement(
