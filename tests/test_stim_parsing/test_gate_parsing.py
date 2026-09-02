@@ -35,6 +35,19 @@ def test_error_is_raised_when_noise_class_is_passed_to_gate_parser():
         )
 
 
+def test_parsing_two_qubit_gates_with_overlapping_targets_creates_multiple_layers():
+    stim_circuit = stim.Circuit("CX 0 1 0 2")
+
+    expected_circuit = sp.Circuit(
+        [
+            sp.GateLayer(sp.gates.CX(sp.Qubit(0), sp.Qubit(1))),
+            sp.GateLayer(sp.gates.CX(sp.Qubit(0), sp.Qubit(2))),
+        ]
+    )
+
+    assert sp.Circuit.from_stim_circuit(stim_circuit) == expected_circuit
+
+
 @pytest.mark.parametrize(
     ("stim_circuit", "expected_gates"),
     [
@@ -183,6 +196,20 @@ def test_parsing_stim_circuit_with_single_gate_layer_returns_the_correct_deltaki
         sp.gates.CZSWAP(sp.Qubit(2), sp.Qubit(3)),
     ]
     expected_circuit = sp.Circuit(sp.GateLayer(expected_gates))
+    assert sp.Circuit.from_stim_circuit(stim_circuit) == expected_circuit
+
+
+def test_parsing_two_qubit_gates_with_overlapping_targets_preserves_qubit_order():
+    stim_circuit = stim.Circuit("CX 0 1 0 2 2 3")
+
+    expected_circuit = sp.Circuit(
+        [
+            sp.GateLayer(sp.gates.CX(sp.Qubit(0), sp.Qubit(1))),
+            sp.GateLayer(sp.gates.CX(sp.Qubit(0), sp.Qubit(2))),
+            sp.GateLayer(sp.gates.CX(sp.Qubit(2), sp.Qubit(3))),
+        ]
+    )
+
     assert sp.Circuit.from_stim_circuit(stim_circuit) == expected_circuit
 
 
