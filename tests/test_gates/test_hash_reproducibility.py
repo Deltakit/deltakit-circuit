@@ -184,11 +184,22 @@ class TestDifferentSeedsDoNotIntroduceUnintendedNondeterminism:
     qubits, gates and targets the circuit is semantically made of."""
 
     @staticmethod
-    def _stim_instructions_as_multiset(stim_text: str) -> set[tuple[str, frozenset]]:
-        """Reduce a Stim circuit's body to an order-independent summary: for
-        each non-QUBIT_COORDS instruction, its name and the *set* of qubit
-        coordinates it targets (recovered via QUBIT_COORDS so the comparison
-        does not depend on which integer index a qubit happened to receive).
+    def _stim_instructions_as_multiset(
+        stim_text: str,
+    ) -> set[tuple[str, frozenset]]:
+        """Reduce a Stim circuit body to an order-independent summary.
+
+        For each non-QUBIT_COORDS instruction, the summary contains its name
+        and the set of qubit coordinates it targets. Coordinates are recovered
+        through QUBIT_COORDS so the comparison does not depend on the integer
+        index assigned to a qubit.
+
+        Args:
+            stim_text: Text representation of a Stim circuit.
+
+        Returns:
+            A set containing instruction names and their targeted qubit
+            coordinates.
         """
         circuit = stim.Circuit(stim_text)
         index_to_coords: dict[int, tuple[float, ...]] = {}
