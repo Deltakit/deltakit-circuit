@@ -6,10 +6,9 @@ from __future__ import annotations
 import math
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
-from typing import ClassVar, Generic, TypeVar
+from typing import ClassVar, Generic, Self, TypeVar
 
 import deltakit_stim as stim
-from typing_extensions import Self
 
 from deltakit_circuit._qubit_identifiers import PauliProduct, Qubit, T, U, _PauliGate
 from deltakit_circuit._stim_identifiers import NoiseStimIdentifier
