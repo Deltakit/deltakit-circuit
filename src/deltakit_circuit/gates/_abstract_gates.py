@@ -7,10 +7,9 @@ import math
 from abc import ABC, abstractmethod
 from collections.abc import Generator, Mapping, Sequence
 from enum import Enum
-from typing import ClassVar, Generic, TypeVar, cast
+from typing import ClassVar, Generic, Self, TypeVar, cast
 
 import deltakit_stim as stim
-from typing_extensions import Self
 
 from deltakit_circuit._qubit_identifiers import MeasurementRecord, Qubit, SweepBit, T, U
 
