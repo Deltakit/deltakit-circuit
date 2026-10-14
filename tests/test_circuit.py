@@ -1315,15 +1315,24 @@ class TestStimCircuit:
             block_decomposition_from_introducing_remnant_edges=True
         )
 
+    @pytest.mark.parametrize("invalid_probability", [1.2, -0.5, 2, -1])
     def test_that_value_error_is_raised_if_approximate_disjoint_error_is_not_specified_as_a_valid_probability(
-        self,
+        self, invalid_probability
     ):
         with pytest.raises(
             ValueError, match="approximate_disjoint_errors is not a valid probability"
         ):
             sp.Circuit(sp.GateLayer(sp.gates.H(0))).as_detector_error_model(
-                approximate_disjoint_errors=1.2
+                approximate_disjoint_errors=invalid_probability
             )
+
+    @pytest.mark.parametrize("valid_value", [True, False, 0, 1, 0.0, 0.5, 1.0])
+    def test_that_valid_approximate_disjoint_errors_values_are_accepted(
+        self, valid_value
+    ):
+        sp.Circuit(sp.GateLayer(sp.gates.H(0))).as_detector_error_model(
+            approximate_disjoint_errors=valid_value
+        )
 
     def test_noisy_deltakit_circuit_circuit_has_correct_stim_representation(
         self, noisy_circuit
