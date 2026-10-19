@@ -560,7 +560,7 @@ class Circuit(Generic[T]):  # pylint: disable=too-many-public-methods
         python_api_reference_vDev.md#stim.Circuit.detector_error_model
         """
         if (
-            isinstance(approximate_disjoint_errors, float)
+            isinstance(approximate_disjoint_errors, (int, float))
             and not 0 <= approximate_disjoint_errors <= 1
         ):
             msg = "approximate_disjoint_errors is not a valid probability"
