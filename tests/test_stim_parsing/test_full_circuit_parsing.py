@@ -116,3 +116,9 @@ def test_parsing_stim_generated_circuits_does_not_raise_an_error(
     stim_generated_circuit,
 ):
     assert sp.Circuit.from_stim_circuit(stim_generated_circuit)
+
+
+@pytest.mark.parametrize("instruction", ["H", "R", "MPP"])
+def test_targetless_instruction_parses_to_empty_circuit(instruction):
+    circuit = sp.Circuit.from_stim_circuit(stim.Circuit(instruction))
+    assert circuit.as_stim_circuit() == stim.Circuit()
