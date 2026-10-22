@@ -174,7 +174,7 @@ def _parse_mpp_instruction(
         _PauliGate | _InvertiblePauliGate | MeasurementPauliProduct
     ] = []
     current_targets, peak_targets = tee(instruction_targets)
-    next(peak_targets)
+    next(peak_targets, None)
     for current_target, next_target in zip_longest(current_targets, peak_targets):
         if current_target.is_combiner:
             continue
@@ -545,7 +545,7 @@ def group_targets(targets: Iterable[T]) -> list[set[T]]:
         A list of overlapping sets separating duplicate elements.
     """
     target_counts = Counter(targets)
-    number_of_groups = max(target_counts.values())
+    number_of_groups = max(target_counts.values(), default=0)
     grouped_targets: list[set[T]] = [set() for _ in range(number_of_groups)]
     for target, target_count in target_counts.items():
         for group in grouped_targets[0:target_count]:
