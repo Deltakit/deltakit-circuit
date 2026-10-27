@@ -6,6 +6,7 @@ import importlib.metadata
 from typing import TYPE_CHECKING
 
 from deltakit_circuit._annotations._detector import Detector
+from deltakit_circuit._annotations._markers import MarkX, MarkY, MarkZ, Pragma
 from deltakit_circuit._annotations._observable import Observable
 from deltakit_circuit._annotations._shift_coordinates import ShiftCoordinates
 from deltakit_circuit._basic_types import Coord2D, Coord2DDelta
