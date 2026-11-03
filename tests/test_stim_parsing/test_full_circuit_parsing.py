@@ -116,3 +116,28 @@ def test_parsing_stim_generated_circuits_does_not_raise_an_error(
     stim_generated_circuit,
 ):
     assert sp.Circuit.from_stim_circuit(stim_generated_circuit)
+
+
+# Block instructions that can't appear as a plain targetless line
+_EXCLUDED = {"REPEAT"}
+
+
+def _targetless_instruction(name: str) -> str:
+    # Build e.g. 'H', 'X_ERROR(0.01)', 'PAULI_CHANNEL_1(0.01,0.01,0.01)'.
+    n_args = min(stim.gate_data(name).num_parens_arguments_range)
+    if n_args == 0:
+        return name
+    return f"{name}({','.join(['0.01'] * n_args)})"
+
+
+TARGETLESS_INSTRUCTIONS = [
+    _targetless_instruction(name)
+    for name in sorted(stim.gate_data())
+    if name not in _EXCLUDED
+]
+
+
+@pytest.mark.parametrize("instruction", TARGETLESS_INSTRUCTIONS)
+def test_targetless_instruction_parses_to_empty_circuit(instruction):
+    circuit = sp.Circuit.from_stim_circuit(stim.Circuit(instruction))
+    assert circuit.as_stim_circuit() == stim.Circuit()
