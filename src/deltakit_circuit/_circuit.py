@@ -13,6 +13,7 @@ from typing import Generic, Literal, Protocol, get_args, no_type_check
 import deltakit_stim as stim
 
 from deltakit_circuit._annotations._detector import Detector
+from deltakit_circuit._annotations._markers import Pragma
 from deltakit_circuit._annotations._observable import Observable
 from deltakit_circuit._annotations._shift_coordinates import ShiftCoordinates
 from deltakit_circuit._gate_layer import GateLayer
@@ -189,7 +190,7 @@ class Circuit(Generic[T]):  # pylint: disable=too-many-public-methods
             msg = "The ID mapping is not bijective, all values must be unique."
             raise ValueError(msg)
         for layer in self._layers:
-            if isinstance(layer, (GateLayer, NoiseLayer, Circuit)):
+            if isinstance(layer, (GateLayer, NoiseLayer, Circuit, Pragma)):
                 layer.transform_qubits(id_mapping)
             elif isinstance(layer, Detector):
                 layer.transform_coordinates(id_mapping)
@@ -455,7 +456,7 @@ class Circuit(Generic[T]):  # pylint: disable=too-many-public-methods
                 continue
             if (
                 isinstance(layer, GateLayer) and len(layer.measurement_gates) > 0
-            ) or isinstance(layer, ShiftCoordinates):
+            ) or isinstance(layer, (ShiftCoordinates, Pragma)):
                 sorted_layers.extend(
                     sorted(unsorted_detectors, key=sort_key, reverse=reverse)
                 )
@@ -474,6 +475,8 @@ class Circuit(Generic[T]):  # pylint: disable=too-many-public-methods
         self, qubit_mapping: Mapping[Qubit[T], int] | None = None
     ) -> stim.Circuit:
         """Get the equivalent Stim circuit from this deltakit_circuit circuit.
+
+        Crumble markers are omitted; use :meth:`as_crumble_string` to retain them.
 
         Parameters
         ----------
@@ -506,6 +509,56 @@ class Circuit(Generic[T]):  # pylint: disable=too-many-public-methods
         stim_circuit = stim.Circuit()
         self.permute_stim_circuit(stim_circuit, qubit_mapping)
         return stim_circuit
+
+    def as_crumble_string(
+        self, qubit_mapping: Mapping[Qubit[T], int] | None = None
+    ) -> str:
+        """Render the circuit with Crumble markers in their layer positions.
+
+        Parameters
+        ----------
+        qubit_mapping : Mapping[Qubit[T], int] | None
+            Qubit identifiers to use in the rendered circuit. By default,
+            use the same mapping as :meth:`as_stim_circuit`.
+
+        Returns
+        -------
+        str
+            A Stim-compatible circuit string including Crumble pragmas.
+        """
+        if qubit_mapping is None:
+            qubit_mapping = default_qubit_mapping(self.qubits)
+        coordinate_circuit = stim.Circuit()
+        if self.iterations == 1:
+            for qubit in self.qubits:
+                qubit.permute_stim_circuit(coordinate_circuit, qubit_mapping)
+        lines = str(coordinate_circuit).splitlines()
+        lines.extend(self._crumble_body_lines(qubit_mapping))
+        return "\n".join(lines)
+
+    def _crumble_body_lines(self, qubit_mapping: Mapping[Qubit[T], int]) -> list[str]:
+        lines: list[str] = []
+        gate_layers = self.gate_layers()
+        last_gate_layer = gate_layers[-1] if gate_layers else None
+        for layer in self.layers:
+            if isinstance(layer, Circuit):
+                lines.extend(layer._crumble_body_lines(qubit_mapping))
+            elif isinstance(layer, Pragma):
+                lines.append(layer.as_crumble_string(qubit_mapping))
+            else:
+                layer_circuit = stim.Circuit()
+                layer.permute_stim_circuit(layer_circuit, qubit_mapping)
+                lines.extend(str(layer_circuit).splitlines())
+            if isinstance(layer, GateLayer) and layer is not last_gate_layer:
+                lines.append("TICK")
+        if self.iterations > 1:
+            lines.append("TICK")
+            return [
+                f"REPEAT {self.iterations} {{",
+                *(f"    {line}" for line in lines),
+                "}",
+            ]
+        return lines
 
     def permute_stim_circuit(
         self,
@@ -582,6 +635,8 @@ class Circuit(Generic[T]):  # pylint: disable=too-many-public-methods
         qubit_mapping: Mapping[int, Qubit[Coordinate]] | None = None,
     ) -> Circuit:
         """Parse a Stim circuit into a deltakit_circuit circuit.
+
+        Stim discards Crumble pragma comments before they can be parsed here.
 
         Parameters
         ----------
@@ -709,7 +764,7 @@ class Circuit(Generic[T]):  # pylint: disable=too-many-public-methods
             return False
 
         for self_layer, other_layer in zip(self.layers, other.layers, strict=True):
-            if isinstance(self_layer, (Detector, Observable, ShiftCoordinates)):
+            if isinstance(self_layer, (Detector, Observable, ShiftCoordinates, Pragma)):
                 if self_layer != other_layer:
                     return False
             elif not self_layer.approx_equals(
@@ -821,5 +876,7 @@ class Circuit(Generic[T]):  # pylint: disable=too-many-public-methods
         return detectors_gates
 
 
-Layer = GateLayer | NoiseLayer | Circuit | Detector | Observable | ShiftCoordinates
+Layer =(
+        GateLayer | NoiseLayer | Circuit | Detector | Observable | ShiftCoordinates | Pragma
+)
 LAYERS = get_args(Layer)
