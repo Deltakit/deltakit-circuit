@@ -88,6 +88,30 @@ def _classify_pauli_target(
     raise ValueError(msg)
 
 
+def _group_gates_into_layers(gates: Iterable[_Gate]) -> list[GateLayer]:
+    # stim fuses consecutive instructions that share a name, so "CX 0 1" then
+    # "CX 0 2" with no TICK between them arrives as one "CX 0 1 0 2" instruction
+    # that acts on qubit 0 twice. A GateLayer holds each qubit at most once, so
+    # spread the gates over as few layers as possible while keeping every qubit
+    # unique within a layer. Each gate goes in the earliest layer that follows
+    # every earlier gate sharing one of its qubits: that preserves the order of
+    # gates which do not commute and parallelises the ones which do.
+    layers: list[list[_Gate]] = []
+    last_layer: dict[Qubit, int] = {}
+    for gate in gates:
+        qubits = gate.qubits
+        layer_index = max(
+            (last_layer[qubit] + 1 for qubit in qubits if qubit in last_layer),
+            default=0,
+        )
+        if layer_index == len(layers):
+            layers.append([])
+        layers[layer_index].append(gate)
+        for qubit in qubits:
+            last_layer[qubit] = layer_index
+    return [GateLayer(layer) for layer in layers]
+
+
 def _parse_single_qubit_gate_instruction(
     gate_class: type[_OneQubitCliffordGate | _ResetGate],
     instruction_targets: Iterable[stim.GateTarget],
@@ -110,7 +134,7 @@ def _parse_two_qubit_gate_instruction(
     instruction_targets: Sequence[stim.GateTarget],
     tag: str | None,
     qubit_mapping: Mapping[int, Qubit],
-) -> GateLayer:
+) -> list[GateLayer]:
     targets: list[Qubit | SweepBit | MeasurementRecord] = []
     for target in instruction_targets:
         if target.is_sweep_bit_target:
@@ -119,7 +143,7 @@ def _parse_two_qubit_gate_instruction(
             targets.append(MeasurementRecord(target.value))
         else:
             targets.append(qubit_mapping.get(target.value, Qubit(target.value)))
-    return GateLayer(gate_class.from_consecutive(targets, tag=tag))
+    return _group_gates_into_layers(gate_class.from_consecutive(targets, tag=tag))
 
 
 def _parse_single_qubit_measurement(
@@ -128,9 +152,9 @@ def _parse_single_qubit_measurement(
     instruction_arguments: Iterable[float],
     tag: str | None,
     qubit_mapping: Mapping[int, Qubit],
-) -> GateLayer:
+) -> list[GateLayer]:
     probability = next(iter(instruction_arguments), 0.0)
-    return GateLayer(
+    measurements = [
         gate_class(
             qubit_mapping.get(target.value, Qubit(target.value)),
             probability,
@@ -138,7 +162,8 @@ def _parse_single_qubit_measurement(
             tag=tag,
         )
         for target in instruction_targets
-    )
+    ]
+    return _group_gates_into_layers(measurements)
 
 
 def _parse_mpp_instruction(
@@ -146,7 +171,7 @@ def _parse_mpp_instruction(
     instruction_arguments: Iterable[float],
     tag: str | None,
     qubit_mapping: Mapping[int, Qubit],
-) -> GateLayer:
+) -> list[GateLayer]:
     """Function for parsing a single MPP instruction. This algorithm is
     particularly complicated because the MPP instruction can have multiple
     different gate targets as input but the algorithm is outlined as such:
@@ -186,7 +211,7 @@ def _parse_mpp_instruction(
             else:
                 qubit_identifiers.append(MeasurementPauliProduct(pauli_gates))
             pauli_gates = []
-    return GateLayer(
+    return _group_gates_into_layers(
         MPP(qubit_id, probability, tag=tag) for qubit_id in qubit_identifiers
     )
 

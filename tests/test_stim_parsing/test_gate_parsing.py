@@ -12,7 +12,7 @@ from deltakit_circuit._parse_stim import (
 
 def test_probability_is_added_on_measurement_gates():
     probability = 0.001
-    layer = parse_stim_gate_instruction(
+    (layer,) = parse_stim_gate_instruction(
         sp.gates.MZ, [stim.GateTarget(0)], [probability], "", qubit_mapping={}
     )
     assert next(iter(layer.gates)).probability == probability
@@ -332,3 +332,145 @@ def test_parsing_single_gate_with_duplicate_qubits_returns_correct_circuit(
     stim_circuit, expected_circuit
 ):
     assert sp.Circuit.from_stim_circuit(stim_circuit) == expected_circuit
+
+
+@pytest.mark.parametrize(
+    ("stim_circuit", "expected_circuit"),
+    [
+        (
+            stim.Circuit("CX 0 1 0 2"),
+            sp.Circuit(
+                [
+                    sp.GateLayer(sp.gates.CX(sp.Qubit(0), sp.Qubit(1))),
+                    sp.GateLayer(sp.gates.CX(sp.Qubit(0), sp.Qubit(2))),
+                ]
+            ),
+        ),
+        (
+            stim.Circuit("CX 0 1 1 2"),
+            sp.Circuit(
+                [
+                    sp.GateLayer(sp.gates.CX(sp.Qubit(0), sp.Qubit(1))),
+                    sp.GateLayer(sp.gates.CX(sp.Qubit(1), sp.Qubit(2))),
+                ]
+            ),
+        ),
+        (
+            stim.Circuit("CZ 0 1 2 3 0 2"),
+            sp.Circuit(
+                [
+                    sp.GateLayer(
+                        [
+                            sp.gates.CZ(sp.Qubit(0), sp.Qubit(1)),
+                            sp.gates.CZ(sp.Qubit(2), sp.Qubit(3)),
+                        ]
+                    ),
+                    sp.GateLayer(sp.gates.CZ(sp.Qubit(0), sp.Qubit(2))),
+                ]
+            ),
+        ),
+    ],
+)
+def test_parsing_two_qubit_gate_with_duplicate_qubits_returns_correct_circuit(
+    stim_circuit, expected_circuit
+):
+    # stim fuses consecutive same-name instructions, so two-qubit gates that
+    # reuse a qubit arrive as one instruction (for example "CX 0 1 0 2"). They
+    # must spread over gate layers so no qubit repeats in a layer.
+    assert sp.Circuit.from_stim_circuit(stim_circuit) == expected_circuit
+
+
+@pytest.mark.parametrize(
+    ("stim_circuit", "expected_circuit"),
+    [
+        (
+            stim.Circuit("M 0 0"),
+            sp.Circuit(
+                [
+                    sp.GateLayer(sp.gates.MZ(sp.Qubit(0))),
+                    sp.GateLayer(sp.gates.MZ(sp.Qubit(0))),
+                ]
+            ),
+        ),
+        (
+            stim.Circuit("M 0 1 0"),
+            sp.Circuit(
+                [
+                    sp.GateLayer([sp.gates.MZ(sp.Qubit(0)), sp.gates.MZ(sp.Qubit(1))]),
+                    sp.GateLayer(sp.gates.MZ(sp.Qubit(0))),
+                ]
+            ),
+        ),
+    ],
+)
+def test_parsing_measurement_with_duplicate_qubits_returns_correct_circuit(
+    stim_circuit, expected_circuit
+):
+    # A qubit measured twice in one fused instruction has to land in separate
+    # layers, the same way the single-qubit gate path already handles it.
+    assert sp.Circuit.from_stim_circuit(stim_circuit) == expected_circuit
+
+
+@pytest.mark.parametrize(
+    ("stim_circuit", "expected_circuit"),
+    [
+        (
+            stim.Circuit("MPP X0 X0"),
+            sp.Circuit(
+                [
+                    sp.GateLayer(sp.gates.MPP(sp.PauliX(sp.Qubit(0)))),
+                    sp.GateLayer(sp.gates.MPP(sp.PauliX(sp.Qubit(0)))),
+                ]
+            ),
+        ),
+        (
+            stim.Circuit("MPP X0 X1 X0"),
+            sp.Circuit(
+                [
+                    sp.GateLayer(
+                        [
+                            sp.gates.MPP(sp.PauliX(sp.Qubit(0))),
+                            sp.gates.MPP(sp.PauliX(sp.Qubit(1))),
+                        ]
+                    ),
+                    sp.GateLayer(sp.gates.MPP(sp.PauliX(sp.Qubit(0)))),
+                ]
+            ),
+        ),
+        (
+            stim.Circuit("MPP X0*X1 X1"),
+            sp.Circuit(
+                [
+                    sp.GateLayer(
+                        sp.gates.MPP(
+                            sp.MeasurementPauliProduct(
+                                [sp.PauliX(sp.Qubit(0)), sp.PauliX(sp.Qubit(1))]
+                            )
+                        )
+                    ),
+                    sp.GateLayer(sp.gates.MPP(sp.PauliX(sp.Qubit(1)))),
+                ]
+            ),
+        ),
+    ],
+)
+def test_parsing_mpp_with_duplicate_qubits_returns_correct_circuit(
+    stim_circuit, expected_circuit
+):
+    # MPP measurements fuse the same way, so a qubit reused across the Pauli
+    # strings of one fused MPP instruction must move to a later layer.
+    assert sp.Circuit.from_stim_circuit(stim_circuit) == expected_circuit
+
+
+def test_fused_instructions_round_trip_preserves_order_and_semantics():
+    # q0 and q2 start at 1. "CX 0 1 1 2" is CX(0,1) then CX(1,2) in that order,
+    # which do not commute, so q1 becomes 1 and q2 becomes 0. The final "M 0 1 2 0"
+    # fuses a repeated measurement of q0. Sampling the re-exported circuit must
+    # match the original bit for bit, which pins both the gate order and the
+    # measurement record order.
+    circuit = stim.Circuit("R 0 1 2\nX 0 2\nCX 0 1 1 2\nM 0 1 2 0")
+    round_tripped = sp.Circuit.from_stim_circuit(circuit).as_stim_circuit()
+    original_sample = circuit.compile_sampler().sample(1).tolist()
+    round_tripped_sample = round_tripped.compile_sampler().sample(1).tolist()
+    assert round_tripped_sample == original_sample
+    assert round_tripped_sample == [[1, 1, 0, 1]]
